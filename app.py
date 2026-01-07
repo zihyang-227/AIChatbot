@@ -163,3 +163,43 @@ if st.button("Generate submission-ready summary"):
     summary = call_llm(messages)
     st.markdown("### ✅ Submission-ready summary")
     st.markdown(summary)
+
+# -----------Download transcripts --------------
+import json
+from datetime import datetime
+
+st.markdown("### 📥 Download chat transcript")
+
+# 1) JSON 
+transcript = {
+    "exported_at": datetime.utcnow().isoformat() + "Z",
+    "concept1": st.session_state.get("concept1", ""),
+    "concept2": st.session_state.get("concept2", ""),
+    "stage": st.session_state.get("stage", ""),
+    "messages": st.session_state.get("messages", []),
+}
+
+json_bytes = json.dumps(transcript, ensure_ascii=False, indent=2).encode("utf-8")
+
+st.download_button(
+    label="Download transcript (JSON)",
+    data=json_bytes,
+    file_name=f"transcript_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+    mime="application/json",
+)
+
+# 2) TXT
+lines = []
+for m in st.session_state.get("messages", []):
+    role = m.get("role", "unknown").upper()
+    content = m.get("content", "")
+    lines.append(f"{role}:\n{content}\n")
+
+txt_data = "\n---\n".join(lines)
+
+st.download_button(
+    label="Download transcript (TXT)",
+    data=txt_data.encode("utf-8"),
+    file_name=f"transcript_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+    mime="text/plain",
+)
