@@ -9,7 +9,7 @@ st.title("💬 ProfessorBot - Rationality II")
 
 st.markdown(
         """
-Welcome to **ProfessorBot – Behavior I**.
+Welcome to **ProfessorBot – Rationality II**.
 
 ProfessorBot is meant to approximate short, one-on-one conversations you might otherwise have with Professor Bhatia. 
 The goal is twofold. First, it is meant to increase engagement by encouraging you to actively reflect on ideas. 
