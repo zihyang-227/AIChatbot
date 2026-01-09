@@ -7,10 +7,9 @@ from openai import OpenAI
 st.set_page_config(page_title="ProfessorBot - Mind I", page_icon="💬")
 st.title("💬 ProfessorBot - Mind I")
 
-with st.expander("📘 About ProfessorBot (Please read before starting)"):
-    st.markdown(
+st.markdown(
         """
-Welcome to **ProfessorBot – Mind I**.
+Welcome to **ProfessorBot – Behavior I**.
 
 ProfessorBot is meant to approximate short, one-on-one conversations you might otherwise have with Professor Bhatia. 
 The goal is twofold. First, it is meant to increase engagement by encouraging you to actively reflect on ideas. 
@@ -21,9 +20,9 @@ This conversation should take only a few minutes to complete. When complete, Pro
 to download the transcript and submit to Canvas.
 
 **Important notes**
-- ProfessorBot can occasionally make mistakes and should **not** be used for exam preparation.
+- ProfessorBot can occasionally make mistakes and should not be used for exam preparation.
 - ProfessorBot is based on OpenAI’s GPT model.
-- Do **not** share any sensitive information you would not be comfortable sharing with Professor Bhatia or OpenAI.
+- Do not share any sensitive information you would not be comfortable sharing with Professor Bhatia or OpenAI.
 """
     )
 
@@ -58,7 +57,7 @@ Conversation procedure: \n
 6. Ask the student if they think this algorithm is adaptive or efficient -- why it succeeds. Let them lead. If they struggle to answer, offer brief prompts such as saving effort.  \n
 7. Ask the student where they think this algorithm could make mistakes or fail. Let them lead. If they struggle to answer, offer brief prompts such as: too many options or ignoring important attributes. \n
 8. Stop as soon as the student has (a) a clear algorithmic description of their own decision process and (b) at least one concrete reflection on why it succeeds and where it can fail. If this does not occur within forty conversational turns, provide a brief summary of a likely failure mode and ask the student whether it applies. \n
-9. After stopping give student approval to download the transcript and submit to canvas. When the conversation should end, include the exact tag: [APPROVAL_GRANTED]. Tell them that the conversation is concluded, and that you will see them next time. \n
+9. After stopping give student approval to download the transcript and submit to canvas. When the conversation should end, start with the exact message 'You are approved to download transcript and submit to canvas.' Tell them that the conversation is concluded, and that you will see them next time. \n
 """
 
 def call_llm(chat_messages):
@@ -83,7 +82,7 @@ for m in st.session_state.messages:
 # ---------- First assistant message ----------
 if len(st.session_state.messages) == 0:
     opening = (
-        "Hi — I’m **ProfessorBot**.\n\n"
+        "Hi — I’m ProfessorBot.\n\n"
         "Before we begin: **What is your Penn ID ?**"
     )
     st.session_state.messages.append({"role": "assistant", "content": opening})
@@ -112,7 +111,7 @@ if user_text:
     st.session_state.messages.append({"role": "assistant", "content": assistant_text})
 
     # Detect approval
-    if "[APPROVAL_GRANTED]" in assistant_text:
+    if "approved to download transcript" in assistant_text:
         st.session_state.conversation_done = True
 
     st.rerun()

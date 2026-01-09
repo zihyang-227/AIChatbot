@@ -7,10 +7,9 @@ from openai import OpenAI
 st.set_page_config(page_title="ProfessorBot - Rationality I", page_icon="💬")
 st.title("💬 ProfessorBot - Rationality I")
 
-with st.expander("📘 About ProfessorBot (Please read before starting)"):
-    st.markdown(
+st.markdown(
         """
-Welcome to **ProfessorBot – Rationality I**.
+Welcome to **ProfessorBot – Behavior I**.
 
 ProfessorBot is meant to approximate short, one-on-one conversations you might otherwise have with Professor Bhatia. 
 The goal is twofold. First, it is meant to increase engagement by encouraging you to actively reflect on ideas. 
@@ -21,12 +20,11 @@ This conversation should take only a few minutes to complete. When complete, Pro
 to download the transcript and submit to Canvas.
 
 **Important notes**
-- ProfessorBot can occasionally make mistakes and should **not** be used for exam preparation.
+- ProfessorBot can occasionally make mistakes and should not be used for exam preparation.
 - ProfessorBot is based on OpenAI’s GPT model.
-- Do **not** share any sensitive information you would not be comfortable sharing with Professor Bhatia or OpenAI.
+- Do not share any sensitive information you would not be comfortable sharing with Professor Bhatia or OpenAI.
 """
     )
-
 # ---------- Session State ----------
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -58,7 +56,7 @@ Conversation procedure:
 4. Give hints if the student does not articulate this within a few turns.  \n
 5. Stop as soon as the student makes a clear connection to the enlightenment. If the connection does not emerge within twenty conversational turns, explain to it to the student.  \n
 6. If the student gives superficial, circular, or purely instrumental answers, or resists making the connection to Enlightenment ideas, redirect with short probes that push them to articulate underlying assumptions rather than arguing or lecturing (e.g. what makes knowledge, self-understanding, or reasoning valuable at all;  or whether decisions could be improved without understanding how people choose). If the student appeals to habit, tradition, status, or luck, ask whether those views implicitly deny the value of reason or agency. If they reject the Enlightenment framing entirely, ask what alternative basis they think justifies education, expertise, or personal development. If they say there is not value in education and self-knowledge tell them why they at penn and tell them that they may be wasting their time. \n
-7. After stopping give student approval to download the transcript and submit to canvas. When the conversation should end, include the exact tag: [APPROVAL_GRANTED]. Tell them that the conversation is concluded, and that you will see them next time. \n
+7. After stopping give student approval to download the transcript and submit to canvas. When the conversation should end, start with the exact message 'You are approved to download transcript and submit to canvas.' Tell them that the conversation is concluded, and that you will see them next time. \n
 """
 
 def call_llm(chat_messages):
@@ -83,7 +81,7 @@ for m in st.session_state.messages:
 # ---------- First assistant message ----------
 if len(st.session_state.messages) == 0:
     opening = (
-        "Hi — I’m **ProfessorBot**.\n\n"
+        "Hi — I’m ProfessorBot.\n\n"
         "Before we begin: **What's your Penn ID ?**"
     )
     st.session_state.messages.append({"role": "assistant", "content": opening})
@@ -112,7 +110,7 @@ if user_text:
     st.session_state.messages.append({"role": "assistant", "content": assistant_text})
 
     # Detect approval
-    if "[APPROVAL_GRANTED]" in assistant_text:
+    if "approved to download transcript" in assistant_text:
         st.session_state.conversation_done = True
 
     st.rerun()

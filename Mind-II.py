@@ -7,10 +7,9 @@ from openai import OpenAI
 st.set_page_config(page_title="ProfessorBot - Mind II", page_icon="💬")
 st.title("💬 ProfessorBot - Mind II")
 
-with st.expander("📘 About ProfessorBot (Please read before starting)"):
-    st.markdown(
+st.markdown(
         """
-Welcome to **ProfessorBot – Mind II**.
+Welcome to **ProfessorBot – Behavior I**.
 
 ProfessorBot is meant to approximate short, one-on-one conversations you might otherwise have with Professor Bhatia. 
 The goal is twofold. First, it is meant to increase engagement by encouraging you to actively reflect on ideas. 
@@ -21,9 +20,9 @@ This conversation should take only a few minutes to complete. When complete, Pro
 to download the transcript and submit to Canvas.
 
 **Important notes**
-- ProfessorBot can occasionally make mistakes and should **not** be used for exam preparation.
+- ProfessorBot can occasionally make mistakes and should not be used for exam preparation.
 - ProfessorBot is based on OpenAI’s GPT model.
-- Do **not** share any sensitive information you would not be comfortable sharing with Professor Bhatia or OpenAI.
+- Do not share any sensitive information you would not be comfortable sharing with Professor Bhatia or OpenAI.
 """
     )
 
@@ -61,7 +60,7 @@ Conversation procedure: \n
 5. Ask how this affect-driven behavior sits with a consequentialist perspective that evaluates choices based on final outcomes. Keep probing until student identifies the paradox that people felt safer but were objectively less safe when driving rather than flying.  \n
 7. Ask the student to reflect on whether they have used affective cues in a similar way in their own decisions and whether they think this helped or hurt them. \n
 8. Stop as soon as the student articulates a clear tension between affect as an adaptive guide and affect as a source of systematically worse outcomes, and is able to reflect on this in their own life. If this does not occur within forty conversational turns, explicitly summarize this tension for them. \n
-9. After stopping give student approval to download the transcript and submit to canvas. When the conversation should end, include the exact tag: [APPROVAL_GRANTED]. Tell them that the conversation is concluded, and that you will see them next time. \n
+9. After stopping give student approval to download the transcript and submit to canvas. When the conversation should end, start with the exact message 'You are approved to download transcript and submit to canvas.' Tell them that the conversation is concluded, and that you will see them next time. \n
 """
 
 def call_llm(chat_messages):
@@ -86,7 +85,7 @@ for m in st.session_state.messages:
 # ---------- First assistant message ----------
 if len(st.session_state.messages) == 0:
     opening = (
-        "Hi — I’m **ProfessorBot**.\n\n"
+        "Hi — I’m ProfessorBot.\n\n"
         "Before we begin: **What is your Penn ID ?**"
     )
     st.session_state.messages.append({"role": "assistant", "content": opening})
@@ -115,7 +114,7 @@ if user_text:
     st.session_state.messages.append({"role": "assistant", "content": assistant_text})
 
     # Detect approval
-    if "[APPROVAL_GRANTED]" in assistant_text:
+    if "approved to download transcript" in assistant_text:
         st.session_state.conversation_done = True
 
     st.rerun()

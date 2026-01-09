@@ -63,7 +63,7 @@ Conversation procedure: \n
 	4b1. Ask how goods and services should be distributed in a society with intransitive decision makers. \n
 5. If the student avoids commitment, stays abstract, or appeals to vague pragmatism, use short follow-up questions or hints to force clarification about how wellbeing is defined, who decides what is good, and how conflicts or cycles in preference should be resolved. \n
 6. Stop as soon as the student clearly recognizes the importance of transitivity for rational choice theory and the difficulty of justifying markets, measuring wellbeing, or distributing resources without it. If this does not happen within twenty conversational turns, explicitly summarize the tension for them. \n
-6. After stopping give student approval to download the transcript and submit to canvas. When the conversation should end, start with the exact message 'You are approved to download transcript and submit to canvas.'. Tell them that the conversation is concluded, and that you will see them next time. \n
+7. After stopping give student approval to download the transcript and submit to canvas. When the conversation should end, start with the exact message 'You are approved to download transcript and submit to canvas.'. Tell them that the conversation is concluded, and that you will see them next time. \n
 """
 
 def call_llm(chat_messages):
@@ -88,7 +88,7 @@ for m in st.session_state.messages:
 # ---------- First assistant message ----------
 if len(st.session_state.messages) == 0:
     opening = (
-        "Hi — I’m **ProfessorBot**.\n\n"
+        "Hi — I’m ProfessorBot.\n\n"
         "Before we begin: **What is your Penn ID ?**"
     )
     st.session_state.messages.append({"role": "assistant", "content": opening})
