@@ -68,7 +68,7 @@ def call_llm(chat_messages):
     client = OpenAI(api_key=api_key)
 
     resp = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-4.1",
         messages=chat_messages,
         temperature=0.4,
     )
