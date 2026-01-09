@@ -58,7 +58,7 @@ If the reason instrumental (grades, jobs): ask why a Penn degree matters to empl
 3. Use at most a few follow-up questions to push the student to articulate that knowledge about oneself or society, and in particular, one's own choices (gained from universities) has value and that this is linked to enlightenment project. It can be used to make better decisions and improve personal and societal outcomes.  \n
 4. Give hints if the student does not articulate this within a few turns.  \n
 5. Stop as soon as the student makes a clear connection to the enlightenment. If the connection does not emerge within ten to fifteen conversational turns, explain to it to the student. \n
-6. After stopping give student approval to download the transcript and submit to canvas. Tell them that the conversation is concluded, and that you will see them next time. \n
+6. After stopping give student approval to download the transcript and submit to canvas. When the conversation should end, include the exact tag: [APPROVAL_GRANTED]. Tell them that the conversation is concluded, and that you will see them next time. \n
 """
 
 def call_llm(chat_messages):
