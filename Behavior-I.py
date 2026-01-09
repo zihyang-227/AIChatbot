@@ -7,8 +7,7 @@ from openai import OpenAI
 st.set_page_config(page_title="ProfessorBot - Behavior I", page_icon="💬")
 st.title("💬 ProfessorBot - Behavior I")
 
-with st.expander("📘 About ProfessorBot (Please read before starting)"):
-    st.markdown(
+st.markdown(
         """
 Welcome to **ProfessorBot – Behavior I**.
 
@@ -21,9 +20,9 @@ This conversation should take only a few minutes to complete. When complete, Pro
 to download the transcript and submit to Canvas.
 
 **Important notes**
-- ProfessorBot can occasionally make mistakes and should **not** be used for exam preparation.
+- ProfessorBot can occasionally make mistakes and should not be used for exam preparation.
 - ProfessorBot is based on OpenAI’s GPT model.
-- Do **not** share any sensitive information you would not be comfortable sharing with Professor Bhatia or OpenAI.
+- Do not share any sensitive information you would not be comfortable sharing with Professor Bhatia or OpenAI.
 """
     )
 
@@ -64,7 +63,7 @@ Conversation procedure: \n
 	4b1. Ask how goods and services should be distributed in a society with intransitive decision makers. \n
 5. If the student avoids commitment, stays abstract, or appeals to vague pragmatism, use short follow-up questions or hints to force clarification about how wellbeing is defined, who decides what is good, and how conflicts or cycles in preference should be resolved. \n
 6. Stop as soon as the student clearly recognizes the importance of transitivity for rational choice theory and the difficulty of justifying markets, measuring wellbeing, or distributing resources without it. If this does not happen within twenty conversational turns, explicitly summarize the tension for them. \n
-6. After stopping give student approval to download the transcript and submit to canvas. When the conversation should end, include the exact tag: [APPROVAL_GRANTED]. Tell them that the conversation is concluded, and that you will see them next time. \n
+6. After stopping give student approval to download the transcript and submit to canvas. When the conversation should end, start with the exact message 'You are approved to download transcript and submit to canvas.'. Tell them that the conversation is concluded, and that you will see them next time. \n
 """
 
 def call_llm(chat_messages):
@@ -111,14 +110,13 @@ if user_text:
     with st.chat_message("assistant"):
         placeholder = st.empty()
         placeholder.markdown("_ProfessorBot is typing…_  \n`||`")
-        with st.spinner("Thinking..."):
-            assistant_text = call_llm(messages)
+        assistant_text = call_llm(messages)
         placeholder.markdown(assistant_text)
 
     st.session_state.messages.append({"role": "assistant", "content": assistant_text})
 
     # Detect approval
-    if "[APPROVAL_GRANTED]" in assistant_text:
+    if "approved to download transcript" in assistant_text:
         st.session_state.conversation_done = True
 
     st.rerun()
