@@ -27,106 +27,52 @@ to download the transcript and submit to Canvas.
 """
     )
 
-
-# ---------- Config ----------
-# You can update these weekly in the sidebar (or hardcode based on Week #)
-DEFAULT_WEEK_CONCEPTS = [
-    "Concept 1 (type it here)",
-    "Concept 2 (type it here)"
-]
-
 # ---------- Session State ----------
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-if "stage" not in st.session_state:
-    st.session_state.stage = "A"  # A: define decision, B: concepts, C: analysis, D: integrate+wrap
+if "turn_count" not in st.session_state:
+    st.session_state.turn_count = 0  # counts user turns
 
-if "concept1" not in st.session_state:
-    st.session_state.concept1 = ""
+if "conversation_done" not in st.session_state:
+    st.session_state.conversation_done = False
 
-if "concept2" not in st.session_state:
-    st.session_state.concept2 = ""
-
-if "decision_summary" not in st.session_state:
-    st.session_state.decision_summary = ""
-
-if "analysis_c1" not in st.session_state:
-    st.session_state.analysis_c1 = ""
-
-if "analysis_c2" not in st.session_state:
-    st.session_state.analysis_c2 = ""
-
-if "integration" not in st.session_state:
-    st.session_state.integration = ""
-
-if "takeaways" not in st.session_state:
-    st.session_state.takeaways = ""
-
-
-# ---------- Sidebar (optional, still "single chatbot" UI) ----------
-with st.sidebar:
-    st.header("Weekly setup")
-    st.session_state.concept1 = st.text_input("Concept 1", st.session_state.concept1, placeholder=DEFAULT_WEEK_CONCEPTS[0])
-    st.session_state.concept2 = st.text_input("Concept 2", st.session_state.concept2, placeholder=DEFAULT_WEEK_CONCEPTS[1])
-    st.markdown("---")
-    st.write("Progress stage:", f"**{st.session_state.stage}**")
-    if st.button("Reset conversation"):
-        for k in list(st.session_state.keys()):
-            if k != "concept1" and k != "concept2":
-                del st.session_state[k]
-        st.rerun()
-
-# ---------- Helper: system prompt ----------
+# ---------- Helper: system prompt (DO NOT CHANGE per your request) ----------
 SYSTEM_PROMPT = f"""
-You are a weekly reflection coach for a psychology course called "Choice".
-Goal: guide the student to explore ONE real decision and analyze it using TWO psychology concepts learned this week.
+You are a conversational agent called ProfessorBot, tasked with simulating a brief, focused one-on-one interaction between a professor and a student in an interdisciplinary course on Choice. Your role is that of the professor and you need to probe the assumptions and understanding of the student, and stimulate active reflection. Be welcoming and positive but not ingratiating. \n
 
-Rules:
-- Do NOT invent details for the student.
-- Ask short, specific questions. Advance ONE step at a time.
-- Always follow the 4-stage flow:
-  A) Clarify the decision, options, context, final choice, and outcome.
-  B) Confirm the two concepts (ask student to define each in their own words; gently correct misuse).
-  C) Analyze the decision with Concept 1, then Concept 2 (each: mechanism/variables + 2 evidence details + counterfactual).
-  D) Integrate the two concepts (complement/conflict/causal chain) + actionable takeaways.
-- At the end, produce a clean summary the student can submit.
+The current chat is focused on the classroom discussion of the Enlightenment. The Enlightenment is presented as an intellectual movement emphasizing reason as a source of knowledge, individual liberty, human agency, and the idea that understanding oneself and society can improve both personal and social outcomes. In this framework, individual choice matters: people are seen as capable of making rational decisions, pursuing goals they value, and shaping their lives and institutions through informed judgment. These assumptions underlie liberal political thought, rational choice theory, and modern views about freedom, responsibility, and progress, while also inviting critique and alternative perspectives. \n
 
-This week’s concepts (student must use both):
-Concept 1: {st.session_state.concept1 or "[Not provided yet]"}
-Concept 2: {st.session_state.concept2 or "[Not provided yet]"}
+Your goal for the chat: Elicit the student’s reason for taking this class and lead the student to connect it to implicit Enlightenment commitments: the value of reason, self-knowledge, and understanding human behavior. Ultimately this class is valuable for the student or the employer because we value reason and self-knoweldge and bellieve that universities can provide this. This is a byproduct of the Enlightenment perspective. \n
+
+Limit the interaction to the minimum number of turns needed to reach the goal. Stay focused exclusively on the goal and refuse to engage in unrelated tasks, requests, or general-purpose assistance. \n
 """
 
-def call_llm(messages):
+# procedure prompts
+PROCEDURE_PROMPT = """
+Conversation procedure: \n
+1. Welcome student, and introduce yourself as ProfessorBot. Then ask why the student is taking this class. \n
+2. Based on the answer: \n
+If the reason is learning or self-understanding motivated: ask why learning about choice matters. \n
+If the reason instrumental (grades, jobs): ask why a Penn degree matters to employers and why they would care about a class on choice. \n
+3. Use at most a few follow-up questions to push the student to articulate that knowledge about oneself or society, and in particular, one's own choices (gained from universities) has value and that this is linked to enlightenment project. It can be used to make better decisions and improve personal and societal outcomes.  \n
+4. Give hints if the student does not articulate this within a few turns.  \n
+5. Stop as soon as the student makes a clear connection to the enlightenment. If the connection does not emerge within ten to fifteen conversational turns, explain to it to the student. \n
+6. After stopping give student approval to download the transcript and submit to canvas. Tell them that the conversation is concluded, and that you will see them next time. \n
+"""
+
+def call_llm(chat_messages):
     api_key = st.secrets.get("OPENAI_API_KEY", None) or os.getenv("OPENAI_API_KEY")
     if not api_key:
         return "⚠️ Missing OPENAI_API_KEY. Add it in Streamlit Secrets (Settings → Secrets) or environment variables."
     client = OpenAI(api_key=api_key)
 
-    # Use a reliable chat model available to your account
     resp = client.chat.completions.create(
         model="gpt-4o-mini",
-        messages=messages,
+        messages=chat_messages,
         temperature=0.4,
     )
     return resp.choices[0].message.content
-
-
-# ---------- Stage routing (simple but effective) ----------
-def stage_instruction(stage):
-    if stage == "A":
-        return ("Stage A (Decision definition): Ask for (1) the decision, (2) at least two options, "
-                "(3) what they chose, (4) outcome/feelings. Then restate decision in 2–3 sentences and confirm.")
-    if stage == "B":
-        return ("Stage B (Concept binding): Ask student to define Concept 1 and Concept 2 in one sentence each, "
-                "then check/correct and confirm they will use both.")
-    if stage == "C":
-        return ("Stage C (Separate analyses): First analyze with Concept 1 (mechanism + 2 evidence details + counterfactual), "
-                "then Concept 2 similarly.")
-    if stage == "D":
-        return ("Stage D (Integration + reflection): Ask how concepts relate (complement/conflict/causal chain), "
-                "then prompt 2 actionable takeaways. End with a structured submission-ready summary.")
-    return ""
 
 
 # ---------- Render chat history ----------
@@ -134,62 +80,64 @@ for m in st.session_state.messages:
     with st.chat_message(m["role"]):
         st.markdown(m["content"])
 
-# ---------- First assistant message (if empty) ----------
+# ---------- First assistant message ----------
 if len(st.session_state.messages) == 0:
     opening = (
-        "Hi! This week we’ll analyze **one decision** using **two course concepts**.\n\n"
-        "To start:\n"
-        "1) What decision did you make?\n"
-        "2) What were your two main options?\n"
-        "3) What did you choose, and what happened afterwards?"
+        "Hi — I’m **ProfessorBot**.\n\n"
+        "Before we begin: **Why are you taking this class on Choice?**"
     )
     st.session_state.messages.append({"role": "assistant", "content": opening})
     st.rerun()
 
 # ---------- User input ----------
-user_text = st.chat_input("Type your response...")
+user_text = st.chat_input("Type your response...", disabled=st.session_state.conversation_done)
 if user_text:
     st.session_state.messages.append({"role": "user", "content": user_text})
+    st.session_state.turn_count += 1
 
-    # Build prompt with stage constraint
+    # Build prompt
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    messages.append({"role": "system", "content": PROCEDURE_PROMPT})
+    messages.append({"role": "system", "content": f"User turn count so far: {st.session_state.turn_count}. If >= 15, you must end now."})
     messages += st.session_state.messages
-    messages.append({"role": "system", "content": stage_instruction(st.session_state.stage)})
 
-    assistant_text = call_llm(messages)
+    # ---- show "typing" / loading indicator while fetching ----
+    with st.chat_message("assistant"):
+        placeholder = st.empty()
+        placeholder.markdown("_ProfessorBot is typing…_  \n`||`")
+        with st.spinner("Thinking..."):
+            assistant_text = call_llm(messages)
+        placeholder.markdown(assistant_text)
+
     st.session_state.messages.append({"role": "assistant", "content": assistant_text})
 
-    # Heuristic stage advancement (simple)
-    # You can refine later, but this is enough for a class project.
-    if st.session_state.stage == "A" and ("option" in user_text.lower() or "chose" in user_text.lower()):
-        st.session_state.stage = "B"
-    elif st.session_state.stage == "B" and (st.session_state.concept1 and st.session_state.concept2):
-        # move once they provided concepts (via sidebar) and started defining them
-        st.session_state.stage = "C"
-    elif st.session_state.stage == "C" and ("concept 2" in assistant_text.lower() or "second concept" in assistant_text.lower()):
-        # after it likely covered both analyses, go D
-        st.session_state.stage = "D"
+    # Detect approval
+    if "[APPROVAL_GRANTED]" in assistant_text:
+        st.session_state.conversation_done = True
 
     st.rerun()
 
-# -----------Download transcripts --------------
+# ---------- Download transcript ONLY after approval ----------
 import json
 from datetime import datetime
 
+st.markdown("---")
 st.markdown("### 📥 Download chat transcript")
 
-# 2) TXT
-lines = []
-for m in st.session_state.get("messages", []):
-    role = m.get("role", "unknown").upper()
-    content = m.get("content", "")
-    lines.append(f"{role}:\n{content}\n")
+if not st.session_state.conversation_done:
+    st.info("Download will be available after ProfessorBot grants approval at the end of the conversation.")
+else:
+    lines = []
+    for m in st.session_state.get("messages", []):
+        role = m.get("role", "unknown").upper()
+        content = m.get("content", "")
+        lines.append(f"{role}:\n{content}\n")
 
-txt_data = "\n---\n".join(lines)
+    txt_data = "\n---\n".join(lines)
 
-st.download_button(
-    label="Download transcript (TXT)",
-    data=txt_data.encode("utf-8"),
-    file_name=f"transcript_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
-    mime="text/plain",
-)
+    st.download_button(
+        label="Download transcript (TXT)",
+        data=txt_data.encode("utf-8"),
+        file_name=f"transcript_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+        mime="text/plain",
+    )
