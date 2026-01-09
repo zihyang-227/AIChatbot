@@ -4,8 +4,29 @@ import streamlit as st
 # --- If you use OpenAI, install "openai" and set OPENAI_API_KEY in Streamlit secrets ---
 from openai import OpenAI
 
-st.set_page_config(page_title="Choice Reflection Chatbot", page_icon="💬")
-st.title("💬 Choice Reflection Chatbot")
+st.set_page_config(page_title="ProfessorBot - Rationality I", page_icon="💬")
+st.title("💬 ProfessorBot - Rationality I")
+
+with st.expander("📘 About ProfessorBot (Please read before starting)"):
+    st.markdown(
+        """
+Welcome to **ProfessorBot – Rationality I**.
+
+ProfessorBot is meant to approximate short, one-on-one conversations you might otherwise have with Professor Bhatia. 
+The goal is twofold. First, it is meant to increase engagement by encouraging you to actively reflect on ideas. 
+Second, it helps surface how students in the class are thinking about the course material, which will inform subsequent lectures 
+and in-class discussion.
+
+This conversation should take only a few minutes to complete. When complete, ProfessorBot will give you the approval 
+to download the transcript and submit to Canvas.
+
+**Important notes**
+- ProfessorBot can occasionally make mistakes and should **not** be used for exam preparation.
+- ProfessorBot is based on OpenAI’s GPT model.
+- Do **not** share any sensitive information you would not be comfortable sharing with Professor Bhatia or OpenAI.
+"""
+    )
+
 
 # ---------- Config ----------
 # You can update these weekly in the sidebar (or hardcode based on Week #)
@@ -151,15 +172,24 @@ if user_text:
 
     st.rerun()
 
-# ---------- Export summary button ----------
-st.markdown("---")
-if st.button("Generate submission-ready summary"):
-    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-    messages += st.session_state.messages
-    messages.append({
-        "role": "system",
-        "content": "Now produce a submission-ready summary with headings: Decision, Concept 1 Analysis, Concept 2 Analysis, Integration, Actionable Takeaways. Keep it concise."
-    })
-    summary = call_llm(messages)
-    st.markdown("### ✅ Submission-ready summary")
-    st.markdown(summary)
+# -----------Download transcripts --------------
+import json
+from datetime import datetime
+
+st.markdown("### 📥 Download chat transcript")
+
+# 2) TXT
+lines = []
+for m in st.session_state.get("messages", []):
+    role = m.get("role", "unknown").upper()
+    content = m.get("content", "")
+    lines.append(f"{role}:\n{content}\n")
+
+txt_data = "\n---\n".join(lines)
+
+st.download_button(
+    label="Download transcript (TXT)",
+    data=txt_data.encode("utf-8"),
+    file_name=f"transcript_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+    mime="text/plain",
+)
