@@ -108,7 +108,7 @@ if user_text:
 
     # ---- show "typing" / loading indicator while fetching ----
     typing_placeholder = st.empty()
-    typing_placeholder.markdown("_ProfessorBot is typing…_  \n`||`")
+    typing_placeholder.markdown("_ProfessorBot is typing…_")
 
     assistant_text = call_llm(messages)
 
