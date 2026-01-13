@@ -107,11 +107,16 @@ if user_text:
     messages += st.session_state.messages
 
     # ---- show "typing" / loading indicator while fetching ----
+    typing_placeholder = st.empty()
+    typing_placeholder.markdown("_ProfessorBot is typing…_  \n`||`")
+
+    assistant_text = call_llm(messages)
+
+    typing_placeholder.empty()
+
+    # now render the assistant message after we have the text
     with st.chat_message("assistant"):
-        placeholder = st.empty()
-        placeholder.markdown("_ProfessorBot is typing…_  \n`||`")
-        assistant_text = call_llm(messages)
-        placeholder.markdown(assistant_text)
+        st.markdown(assistant_text)
 
     st.session_state.messages.append({"role": "assistant", "content": assistant_text})
 
