@@ -23,6 +23,7 @@ to download the transcript and submit to Canvas.
 - ProfessorBot can occasionally make mistakes and should not be used for exam preparation.
 - ProfessorBot is based on OpenAI’s GPT model.
 - Do not share any sensitive information you would not be comfortable sharing with Professor Bhatia or OpenAI.
+- If you do not wish to engage with ProfessorBot, please reach out to Professor Bhatia for an alternate assignment.
 """
     )
 
