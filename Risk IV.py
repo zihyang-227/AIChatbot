@@ -4,7 +4,7 @@ import streamlit as st
 # --- If you use OpenAI, install "openai" and set OPENAI_API_KEY in Streamlit secrets ---
 from openai import OpenAI
 
-st.set_page_config(page_title="ProfessorBot - Risk II", page_icon="💬")
+st.set_page_config(page_title="ProfessorBot - Risk I", page_icon="💬")
 st.title("💬 ProfessorBot - Risk II")
 
 st.markdown(
